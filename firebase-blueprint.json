@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Main user settings, memory nodes, and emotional profile stats",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "ambientMode": { "type": "string" },
+        "theme": { "type": "string" },
+        "urgesSurvived": { "type": "number" },
+        "honestyCount": { "type": "number" },
+        "memorySummary": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["username", "ambientMode", "theme", "urgesSurvived", "honestyCount", "memorySummary"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "A single interactive prompt or response between user and Brother",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "role", "text", "timestamp"]
+    },
+    "JournalEntry": {
+      "title": "JournalEntry",
+      "description": "A private atmospheric reflection of emotional states logged over time",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "mood": { "type": "string" },
+        "tags": { "type": "array" },
+        "timestamp": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "content", "date", "mood", "tags", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User preferences and companion configuration"
+    },
+    "/users/{userId}/chats/{chatId}": {
+      "schema": "ChatMessage",
+      "description": "Individual message entries in a user conversation log"
+    },
+    "/users/{userId}/journals/{journalId}": {
+      "schema": "JournalEntry",
+      "description": "Private visual climate or weather logging sheets for the user"
+    }
+  }
+}

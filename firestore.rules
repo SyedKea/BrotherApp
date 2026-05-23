@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Core Primitive Definitions
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    
+    // Validation Blueprints
+    function isValidUser(data) {
+      return data.username is string && data.username.size() >= 1 && data.username.size() <= 100
+          && data.ambientMode is string && data.ambientMode.size() <= 100
+          && data.theme is string && data.theme.size() <= 50
+          && data.urgesSurvived is int && data.urgesSurvived >= 0
+          && data.honestyCount is int && data.honestyCount >= 0
+          && data.memorySummary is string && data.memorySummary.size() <= 20000;
+    }
+    
+    function isValidChatMessage(data) {
+      return data.id is string && data.id.size() <= 128
+          && data.role is string && (data.role == 'user' || data.role == 'assistant')
+          && data.text is string && data.text.size() <= 20000
+          && data.timestamp is string && data.timestamp.size() <= 100;
+    }
+    
+    function isValidJournalEntry(data) {
+      return data.id is string && data.id.size() <= 128
+          && data.content is string && data.content.size() <= 60000
+          && data.date is string && data.date.size() <= 150
+          && data.mood is string && data.mood.size() <= 100
+          && data.tags is list && data.tags.size() <= 100
+          && data.timestamp is int;
+    }
+
+    // Collection Security Layers
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming());
+      allow delete: if false; // For security profiles cannot be wiped directly by user client Snaps
+    }
+    
+    match /users/{userId}/chats/{chatId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(chatId) && isValidChatMessage(incoming());
+      allow update, delete: if isOwner(userId) && isValidId(chatId);
+    }
+
+    match /users/{userId}/journals/{journalId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(journalId) && isValidJournalEntry(incoming());
+      allow update: if isOwner(userId) && isValidId(journalId) && isValidJournalEntry(incoming());
+      allow delete: if isOwner(userId);
+    }
+  }
+}

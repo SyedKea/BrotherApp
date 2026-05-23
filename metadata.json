@@ -1,0 +1,6 @@
+{
+  "name": "BROTHER",
+  "description": "A cinematic emotional safe space and midnight companion for young men struggling with isolation, overthinking, and late-night stresses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
